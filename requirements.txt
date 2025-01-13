@@ -1,0 +1,29 @@
+# langchain
+# nest_asyncio
+# llama-index
+# llama-parse
+# pdfplumber
+# sentence-transformers 
+
+# faiss-cpu 
+# openai
+
+
+# # 
+# llama-index-readers-file 
+# pymupdf
+# llama-index-vector-stores-postgres
+# llama-index-embeddings-huggingface
+# llama-index-llms-llama-cpp
+# psycopg2-binary 
+# pgvector 
+# asyncpg 
+# # "sqlalchemy[asyncio]" 
+# greenlet
+# llama-cpp-python
+# pymupdf
+# frontend
+
+
+# webpage
+Django

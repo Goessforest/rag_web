@@ -1,5 +1,5 @@
 # build image:
- docker build -t my-python-app .
+docker buildx build --tag personal_rag .
 
 # run image:
-docker run --name my-python-container my-python-app
+docker run -p 8000:8000 personal_rag
