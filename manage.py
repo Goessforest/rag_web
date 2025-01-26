@@ -2,6 +2,8 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import json
+
 
 
 def main():
@@ -19,4 +21,8 @@ def main():
 
 
 if __name__ == '__main__':
+    with open(".secrets.json", "r") as f:
+        secrets = json.load(f)
+        for key, value in secrets.items():
+            os.environ[key] = value
     main()

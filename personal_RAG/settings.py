@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'chat'
 ]
 
 MIDDLEWARE = [
@@ -72,13 +74,39 @@ WSGI_APPLICATION = 'personal_RAG.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get("ENVIRONMENT_TYPE") == "DEV":
+    logging.info("DEV")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',  # The PostgreSQL engine
+            'NAME': 'vector_db',                       # The name of your database
+            'USER': 'jakobprivat',                   # The PostgreSQL user
+            'PASSWORD': os.environ["POSTGRES_PASSWORD"],                   # The user’s password
+            'HOST': 'localhost',                        # Typically 'localhost' or an IP
+            'PORT': '5432',                             # Default PostgreSQL port
+        }
     }
-}
+# elif os.environ.get("ENVIRONMENT_TYPE") == "PROD":
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.postgresql',  # The PostgreSQL engine
+#             'NAME': 'mydatabase',                       # The name of your database
+#             'USER': 'jakobprivat',                   # The PostgreSQL user
+#             'PASSWORD': 'mypassword',                   # The user’s password
+#             'HOST': 'localhost',                        # Typically 'localhost' or an IP
+#             'PORT': '5432',                             # Default PostgreSQL port
+#         }
+#     }
+else:
+    logging.ERROR("NO ENVIRONMENT_TYPE SET")
+    raise TypeError("NO ENVIRONMENT_TYPE SET")
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -121,3 +149,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

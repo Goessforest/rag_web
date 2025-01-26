@@ -1,19 +1,19 @@
 # langchain
 # nest_asyncio
-# llama-index
+llama-index
 # llama-parse
 # pdfplumber
 # sentence-transformers 
 
 # faiss-cpu 
-# openai
+openai
 
 
 # # 
 # llama-index-readers-file 
 # pymupdf
-# llama-index-vector-stores-postgres
-# llama-index-embeddings-huggingface
+llama-index-vector-stores-postgres
+llama-index-embeddings-huggingface
 # llama-index-llms-llama-cpp
 # psycopg2-binary 
 # pgvector 
