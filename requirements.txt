@@ -1,8 +1,8 @@
 # langchain
 # nest_asyncio
 llama-index
-# llama-parse
-# pdfplumber
+llama-parse
+pdfplumber
 # sentence-transformers 
 
 # faiss-cpu 

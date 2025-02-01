@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -75,23 +76,63 @@
             color: #fff;
             cursor: pointer;
         }
+        /* Notification bar styling */
+        .notification-container {
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            background-color: #28a745; /* or your preferred color */
+            color: #fff;
+            z-index: 9999;
+        }
+        .notification {
+            display: inline-block;
+            padding: 8px 15px;
+        }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <h2>Upload PDF</h2>
-            <!-- In your sidebar or wherever you want the upload widget -->
-            <form method="POST" enctype="multipart/form-data" id="pdfUploadForm">
+    {% if messages %}
+    <div class="notification-container" id="notification-container">
+        {% for message in messages %}
+            <div class="notification">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(function() {
+            const notif = document.getElementById('notification-container');
+            if (notif) {
+                notif.style.display = 'none';
+            }
+        }, 3000);
+    </script>
+    {% endif %}
+
+    <!-- Only ONE .wrapper for our layout -->
+    <div class="wrapper">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <form method="POST">
                 {% csrf_token %}
-                <!-- 'multiple' allows the user to select multiple files. -->
-                <input type="file" name="pdf_files" accept=".pdf" multiple id="pdfInput" />
+                <button type="submit" name="clear_chat" value="clear_chat" 
+                        style="width: 100%; padding: 10px; background-color: #ff4d4d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">
+                    Clear Chat
+                </button>
             </form>
 
+            <h2>Upload PDF</h2>
+            <form method="POST" enctype="multipart/form-data" id="pdfUploadForm">
+                {% csrf_token %}
+                <!-- 'multiple' allows user to select multiple files. -->
+                <input type="file" name="pdf_files" accept=".pdf" multiple id="pdfInput" />
+            </form>
             <script>
-                // When the user selects one or more files, submit the form automatically.
                 document.getElementById('pdfInput').addEventListener('change', function() {
                     if (this.files.length > 0) {
                         document.getElementById('pdfUploadForm').submit();
@@ -99,64 +140,81 @@
                 });
             </script>
 
-
-        <h3>Available PDFs</h3>
-        <ul>
-            {% for pdf_name in pdf_files %}
-            <li>
-                <a href="{{ MEDIA_URL }}pdfs/{{ pdf_name }}" target="_blank">
-                    {{ pdf_name }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <!-- MAIN CHAT AREA -->
-    <div class="chat-container">
-
-        <div class="conversation" id="conversation">
-            {% for msg in messages %}
-                <div class="message {% if msg.role == 'user' %}user{% elif msg.role == 'source' %}sources{% else %}assistant{% endif %}">
-                {% if msg.role == "assistant" %}
-                    <div class="message assistant">
-                        <strong>Assistant:</strong> 
-                        {{ msg.content|safe }} <!-- |safe to allow HTML details/summary -->
-                    </div>
-                {% elif msg.role == "source" %}
-                    <div class="message sources">
-                        <strong>Sources:</strong> 
-                        {{ msg.content|safe }} <!-- |safe to allow HTML details/summary -->
-                    </div>
-                {% else %}
-                    <div class="message user">
-                        <strong>You:</strong> {{ msg.content }}
-                    </div>
-                {% endif %}
-                </div>
-            {% endfor %}
+            <h3>Available PDFs</h3>
+            <div>
+                {% for pdf in pdf_files %}
+                <div>
+                    <!-- Button with conditional coloring -->
+                    <button
+                    style="background-color: {{ pdf.is_parsed|yesno:'#28a745,#dc3545' }}; 
+                           color: #fff; 
+                           border: none; 
+                           padding: 8px 15px; 
+                           margin: 5px 0; 
+                           border-radius: 4px; 
+                           cursor: pointer;"
+                    onclick="window.open('{{ MEDIA_URL }}pdfs/{{ pdf.name }}', '_blank');"
+                >
+                    {{ pdf.name }}
+                </button>
+                
+            </div>
+                {% endfor %}
         </div>
 
-        <!-- CHAT INPUT FORM -->
-        <div class="form-container">
-            <form method="POST">
-                {% csrf_token %}
-                <input type="text" name="user_input" placeholder="Type your message..." required />
-                <input type="submit" value="Send" />
-            </form>
+        </div>
+
+        <!-- MAIN CHAT AREA -->
+        <div class="chat-container">
+            <div class="conversation" id="conversation">
+                {% for msg in chat_messages %}
+                    <div class="message 
+                                {% if msg.role == 'user' %}user
+                                {% elif msg.role == 'source' %}sources
+                                {% else %}assistant
+                                {% endif %}">
+                        
+                        {% if msg.role == "assistant" %}
+                            <strong>Assistant:</strong> 
+                            {{ msg.content|safe }}
+                        {% elif msg.role == "source" %}
+                            <strong>Sources:</strong> 
+                            {{ msg.content|safe }}
+                        {% else %}
+                            <strong>You:</strong> {{ msg.content }}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- CHAT INPUT FORM -->
+            <div class="form-container">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="user_input" placeholder="Type your message..." required />
+                    <input type="submit" value="Send" />
+                    <!-- Numeric input field with default value 5 -->
+                    <input 
+                        type="number" 
+                        name="similarity_top_k" 
+                        value="{{ saved_int_count }}"
+                        min="1" 
+                        max="20"
+                        style="width: 30px; margin-right: 10px; margin-left: 10px;"
+                    />
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Auto-scroll to the bottom of conversation on page load
-    window.onload = function() {
-        const convoDiv = document.getElementById('conversation');
-        if (convoDiv) {
-            convoDiv.scrollTop = convoDiv.scrollHeight;
+    <script>
+        // Auto-scroll to the bottom of conversation on page load
+        window.onload = function() {
+            const convoDiv = document.getElementById('conversation');
+            if (convoDiv) {
+                convoDiv.scrollTop = convoDiv.scrollHeight;
+            }
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>
