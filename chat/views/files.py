@@ -6,7 +6,7 @@ from ..rag.add_to_storage import Parse_and_Store_Vector
 import threading
 import requests
 from django.contrib import messages
-from django.shortcuts import render
+# from django.shortcuts import render
 
 
 
@@ -15,7 +15,10 @@ file_lock = threading.Lock()  # Global lock to protect file operations
 def list_pdf_files():
     pdf_files_list = []
     pdf_folder_path = os.path.join(settings.MEDIA_ROOT, 'pdfs')
+    os.makedirs(pdf_folder_path, exist_ok=True)
     md_folder_path = os.path.join(settings.MEDIA_ROOT, 'mds')
+    os.makedirs(md_folder_path, exist_ok=True)
+
     md_files_list = [ os.path.basename(file).strip(".md").lower() for file in os.listdir(md_folder_path) if file.lower().endswith('.md')]
     if os.path.exists(pdf_folder_path):
         for f in os.listdir(pdf_folder_path):
@@ -81,7 +84,7 @@ def handle_files(request):
 
             
                     # Start background processing
-            thread = threading.Thread(target=async_file_parser, args=(save_path), daemon=True)
+            thread = threading.Thread(target=async_file_parser, args=(save_path,), daemon=True)
             thread.start()
             logging.warning(f"Started processing {pdf_file.name} in the background.")
             

@@ -1,19 +1,29 @@
-
-# Start from a minimal Python image
+# Start from official Python image
 FROM python:3.9-slim
 
-# Set a working directory in the container
-WORKDIR /app
+# Prevent Python from writing pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Copy and install Python requirements
-COPY requirements.txt .
+# Create directory for the Django app
+WORKDIR /code
+
+# Install any system dependencies you need, e.g. libpq-dev for Postgres
+RUN apt-get update \
+    && apt-get install -y gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first to leverage Docker layer caching
+COPY requirements.txt /code/
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all project files into the container
-COPY . .
+# Copy the rest of your application code
+COPY . /code/
 
-# Expose the Django dev server port
+# Expose port 8000 for Django (if you plan to run manage.py runserver or gunicorn on port 8000)
 EXPOSE 8000
 
-# By default, run the Django dev server
+# By default, run Django server (can be overridden by docker-compose or explicitly in the Dockerfile)
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

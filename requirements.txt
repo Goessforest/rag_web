@@ -27,3 +27,4 @@ llama-index-embeddings-huggingface
 
 # webpage
 Django
+gunicorn

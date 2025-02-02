@@ -1,0 +1,42 @@
+services:
+  db:
+    # image: postgres:14    # ankane/pgvector:latest # 
+    build:
+      context: .
+      dockerfile: dockerfile.db
+    # Use environment variables to configure Postgres
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    # Mount a volume for persistent Postgres data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # Optional: define a custom name for the container
+    container_name: my_django_db
+
+  web:
+    build: .
+    container_name: my_django_web
+    command: gunicorn personal_RAG.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      # Map the code for live development, optional in production
+      - .:/code
+      # Volume for media files. Adjust the path as needed.
+      - media:/code/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      # Django needs these to connect to Postgres
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+
+volumes:
+  postgres_data:
+  media:
