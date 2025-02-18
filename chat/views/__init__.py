@@ -14,7 +14,10 @@ from ..rag import RAG_defaults
 from .files import handle_files, list_pdf_files
 
 
+from django.contrib.auth.decorators import login_required
 
+
+@login_required(login_url='/login/')  # Redirects to login page if not authenticated
 @csrf_exempt
 def chat_home(request):
     # 1) Clear messages if it's a GET request
