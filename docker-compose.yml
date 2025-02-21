@@ -36,6 +36,20 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
+      
+  nginx:
+    image: nginx:alpine
+    container_name: my_django_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Mount your custom nginx configuration
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount your SSL certificates (assumes you have a local ./ssl folder with your cert files)
+      - ./ssl:/etc/ssl:ro
+    depends_on:
+      - web
 
 volumes:
   postgres_data:

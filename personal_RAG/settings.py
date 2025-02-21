@@ -159,3 +159,22 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/chat/'  # Redirect after successful login
 LOGOUT_REDIRECT_URL = '/login/'  # Redirect after logout
 
+
+
+# SSL/TLS settings
+if os.environ.get("ENFORCE_SSL") == "true":
+
+    # Redirect all HTTP requests to HTTPS
+    SECURE_SSL_REDIRECT = True
+
+    # Mark cookies as secure
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Use HSTS for added security
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Tell Django to trust the proxy’s header for the original request protocol
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
