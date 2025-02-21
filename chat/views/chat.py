@@ -9,7 +9,7 @@ def chat_functionality(request):
     if user_input:
         request.session['chat_messages'].append({"role": "user", "content": user_input})
         try:
-            rag = VectorDBRetriever()
+            rag = VectorDBRetriever(user_id=request.user.id)
             logging.warning(f"User input: {user_input}")
             
             # Query your RAG or LLM system

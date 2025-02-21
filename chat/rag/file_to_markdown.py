@@ -76,27 +76,28 @@ class FileToMarkdown:
 
     def get_file_name(self, md_file:str, file_name:str) -> str:
         '''Returns the file name from a markdown file using OpenAI'''
-        try:   
-            # shorten the file if it is too long
-            file_charaters = len(md_file)
-            if file_charaters > MAX_OPENAI_CHARACTERS:
-                limit = int(MAX_OPENAI_CHARACTERS/2)
-                start = md_file[:limit]
-                end = md_file[-limit:]
-                md_file = start + "\n ...(section shortend)... \n" + end
+        if file_name.endswith(".pdf"):
+            try:   
+                # shorten the file if it is too long
+                file_charaters = len(md_file)
+                if file_charaters > MAX_OPENAI_CHARACTERS:
+                    limit = int(MAX_OPENAI_CHARACTERS/2)
+                    start = md_file[:limit]
+                    end = md_file[-limit:]
+                    md_file = start + "\n ...(section shortend)... \n" + end
 
-            # generate response
-            response = self._openai_query.query(prompt=md_file, instructions=DEFAULT_PROMPT, max_tokens=100, messages=[])
-            ai_file_name = response.content
-            if bool(re.match(r"^[A-Z][a-zA-Z]+( et al)? \d{4} .+$", ai_file_name)):
-                return ai_file_name[:80]
-        except KeyboardInterrupt as e:
-            raise e
-        except Exception as e:
-            logging.error(f"Error in getting file name: {e}")
+                # generate response
+                response = self._openai_query.query(prompt=md_file, instructions=DEFAULT_PROMPT, max_tokens=100, messages=[])
+                ai_file_name = response.content
+                if bool(re.match(r"^[A-Z][a-zA-Z]+( et al)? \d{4} .+$", ai_file_name)):
+                    return ai_file_name[:80]
+            except KeyboardInterrupt as e:
+                raise e
+            except Exception as e:
+                logging.error(f"Error in getting file name: {e}")
 
             
-        return file_name
+        return file_name.split(".")[0]
         
 
 

@@ -1,7 +1,7 @@
 from llama_index.core import QueryBundle
 # from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.schema import NodeWithScore
-from llama_index.core.vector_stores import VectorStoreQuery
+from llama_index.core.vector_stores import VectorStoreQuery, MetadataFilters, MetadataFilter
 from typing import Any, List, Optional
 # import textwrap
 
@@ -28,19 +28,21 @@ class VectorDBRetriever():
 
     def __init__(
         self,
+        user_id: int,
         query_mode: str = "default",
     ) -> None:
         """Init params."""
-        self.rag_defaults = RAG_defaults()
+        self.vector_store = RAG_defaults().get_vector_store(user_id)
+        self.user_id = user_id
         self._query_mode = query_mode
         self._openai_query = OpenAIQuery()
         super().__init__()
 
 
-    def query(self, question: str, similarity_top_k:int=5, max_tokens:int=100) -> Union[NodeWithScore, AI_Message]:
+    def query(self, question: str, similarity_top_k:int=5, max_tokens:int=100, **kwargs) -> Union[NodeWithScore, AI_Message]:
         """Ask a question and get a response from Openai based on the query"""
         queryObject = QueryBundle(query_str=question)
-        nodes_with_scores = self._retrieve(queryObject, similarity_top_k=similarity_top_k)
+        nodes_with_scores = self._retrieve(queryObject, similarity_top_k=similarity_top_k, **kwargs)
 
         response = self._openai_query.query(messages=self._create_messages(nodes_with_scores, queryObject), prompt=None, max_tokens=max_tokens)
         return nodes_with_scores, response
@@ -72,17 +74,24 @@ class VectorDBRetriever():
 
 
 
-    def _retrieve(self, query_bundle: QueryBundle, similarity_top_k:int=5) -> List[NodeWithScore]:
+    def _retrieve(self, query_bundle: QueryBundle,
+                  similarity_top_k:int=5, **kwargs) -> List[NodeWithScore]:
         """Retrieve."""
-        query_embedding = self.rag_defaults.embedding_model.get_query_embedding(
+        query_embedding = RAG_defaults().embedding_model.get_query_embedding(
             query_bundle.query_str
         )
+
+       
+        filter_list = [MetadataFilter(key=key, value=value) for key, value in kwargs.items() if value is not None and key in self.rag_defaults.required_metadata]
+        filterBundle = MetadataFilters(filters=filter_list) if len(filter_list)>0 else None
+   
         vector_store_query = VectorStoreQuery(
             query_embedding=query_embedding,
             similarity_top_k=similarity_top_k,
             mode=self._query_mode,
+            filters=filterBundle,   # Add meta data filters here
         )
-        query_result = self.rag_defaults.vector_store.query(vector_store_query)
+        query_result = self.vector_store.query(vector_store_query)
 
         nodes_with_scores = []
         for index, node in enumerate(query_result.nodes):
