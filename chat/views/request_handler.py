@@ -53,7 +53,7 @@ class Chat_home_model:
         self._lock = threading.Lock()  # Global lock to protect file operations
         self._vector_store = RAG_defaults().get_vector_store(self._user_id)
 
-        self.chat_messages = Chat_message.parse_from_list(request.session['chat_messages'])
+        self.chat_messages = Chat_message.parse_from_list(request.session.get('chat_messages', []))
 
         # Actions
         if request.method == 'GET':
@@ -203,6 +203,7 @@ class Chat_home_model:
         """Convert the model to a dictionary"""
 
         logging.warning(f"{self._users_pdf_path}")
+        self._request.session['chat_messages'] = [msg.to_dict() for msg in self.chat_messages]
         return {
             'chat_messages': [msg.to_dict() for msg in self.chat_messages],
             'saved_int_count': self.target_number_of_nodes,

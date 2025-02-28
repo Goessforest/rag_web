@@ -16,3 +16,17 @@ docker run -p 8000:8000 personal_rag
 
 # test
 python3 manage.py runserver  
+
+
+
+# setup .env file for docker :
+    DB_NAME=personal_rag_db
+    DB_USER=personal_rag_user
+    DB_PASSWORD=Your_password
+    DB_HOST=db
+    DB_PORT=5432
+    llama_cloud_api=llx-JHA************
+    OPENAI_API_KEY=sk-proj-qh-*********
+    ENVIRONMENT_TYPE=DEV 
+    ENFORCE_SSL=true
+

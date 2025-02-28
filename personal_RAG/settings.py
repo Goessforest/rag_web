@@ -170,6 +170,8 @@ if os.environ.get("ENFORCE_SSL") == "true":
     # Mark cookies as secure
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    APPEND_SLASH = False
+
 
     # Use HSTS for added security
     SECURE_HSTS_SECONDS = 31536000  # 1 year
@@ -178,3 +180,6 @@ if os.environ.get("ENFORCE_SSL") == "true":
 
     # Tell Django to trust the proxy’s header for the original request protocol
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    CSRF_TRUSTED_ORIGINS = ["https://192.168.65.1", 'https://localhost', 'https://localhost:443', 'https://127.0.0.1', 'https://0.0.0.0', 'https://*.127.0.0.1',
+    'https://*.localhost']
+

@@ -67,7 +67,11 @@ class RAG_defaults:
 
                     # Sanitize the user_id to ensure it's safe for use in a table name
                     safe_user_id = re.sub(r'\W+', '_', str(user_id).lower())
-                    table_name = self.BASE_TABLE_NAME + safe_user_id
+                    # TODO: REMOVE this once in dProduction
+                    if str(safe_user_id) == str(1):
+                        table_name = 'llama2_paper_v3'
+                    else:
+                        table_name = self.BASE_TABLE_NAME + safe_user_id
 
                     self._vector_stores[user_id] = PGVectorStore.from_params(
                         database=db_config['NAME'],

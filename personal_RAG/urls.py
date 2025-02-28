@@ -21,11 +21,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import LoginView
 
+from .views import test_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view(template_name='chat/login.html'), name='login'),
-
+    path('test/', test_view),
 
     path('', include('chat.urls'))
 ]
