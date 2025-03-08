@@ -1,8 +1,8 @@
-tunnel: <TUNNEL-ID>  # Replace with your actual tunnel ID
-credentials-file: /etc/cloudflared/<TUNNEL-ID>.json
+tunnel: b0654952-43b1-4f55-96e2-de729c747a1f  # Replace with your actual tunnel ID
+credentials-file: /etc/cloudflared/b0654952-43b1-4f55-96e2-de729c747a1f.json
 
 ingress:
   # Route your chosen subdomain (which should be configured in your Cloudflare dashboard) to nginx
-  - hostname: yoursubdomain.example.com
+  - hostname: ai.goessforest.com
     service: https://nginx:443
   - service: http_status:404
