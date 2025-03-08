@@ -50,6 +50,19 @@ services:
       - ./ssl:/etc/ssl:ro
     depends_on:
       - web
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared:/etc/cloudflared  # This mounts your tunnel configuration and credentials
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    # Optionally, attach to the default network (or a custom network shared by all services)
+    networks:
+      - default
 
 volumes:
   postgres_data:
