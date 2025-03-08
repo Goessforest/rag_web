@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9c_tmf*6z=_-i_9!g16q8mvg1+edlzv_t)v1yp#212@1mtk+o)'
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -180,6 +180,9 @@ if os.environ.get("ENFORCE_SSL") == "true":
 
     # Tell Django to trust the proxy’s header for the original request protocol
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    CSRF_TRUSTED_ORIGINS = ["https://192.168.65.1", 'https://localhost', 'https://localhost:443', 'https://127.0.0.1', 'https://0.0.0.0', 'https://*.127.0.0.1',
-    'https://*.localhost']
+    USE_X_FORWARDED_HOST = True
+    SECURE_SSL_REDIRECT = True
+
+
+    CSRF_TRUSTED_ORIGINS = ["https://ai.goessforest.com", "https://nginx", "https://nginx:443"]
 

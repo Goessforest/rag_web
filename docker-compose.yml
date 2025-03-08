@@ -19,24 +19,31 @@ services:
   web:
     build: .
     container_name: my_django_web
-    command: gunicorn personal_RAG.wsgi:application --bind 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn personal_RAG.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      # Map the code for live development, optional in production
       - .:/code
-      # Volume for media files. Adjust the path as needed.
       - media:/code/media
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       - db
     environment:
-      # Django needs these to connect to Postgres
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
-      
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - llama_cloud_api=${llama_cloud_api}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ENVIRONMENT_TYPE=${ENVIRONMENT_TYPE}
+      - ENFORCE_SSL=${ENFORCE_SSL}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+
   nginx:
     image: nginx:alpine
     container_name: my_django_nginx
@@ -50,19 +57,21 @@ services:
       - ./ssl:/etc/ssl:ro
     depends_on:
       - web
-  
+
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
-    command: tunnel --config /etc/cloudflared/config.yml run
-    volumes:
-      - ./cloudflared:/etc/cloudflared  # This mounts your tunnel configuration and credentials
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
     depends_on:
       - nginx
-    restart: unless-stopped
-    # Optionally, attach to the default network (or a custom network shared by all services)
     networks:
       - default
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro
+    env_file:
+      - .env  # Ensure .env contains CLOUDFLARE_TUNNEL_TOKE
+
 
 volumes:
   postgres_data:

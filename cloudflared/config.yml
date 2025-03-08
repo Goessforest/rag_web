@@ -1,6 +1,7 @@
-tunnel: b0654952-43b1-4f55-96e2-de729c747a1f  # Replace with your actual tunnel ID
-credentials-file: /etc/cloudflared/b0654952-43b1-4f55-96e2-de729c747a1f.json
-
+# tunnel: b0654952-43b1-4f55-96e2-de729c747a1f  # Replace with your actual tunnel ID
+#env_file:
+#  - ./.env
+# token: ${CLOUDFLARE_TUNNEL_TOKEN}
 ingress:
   # Route your chosen subdomain (which should be configured in your Cloudflare dashboard) to nginx
   - hostname: ai.goessforest.com

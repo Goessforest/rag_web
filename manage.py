@@ -5,11 +5,11 @@ import sys
 import json
 
 
-
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'personal_RAG.settings')
     os.environ.setdefault('DJANGO_CONFIGURATION', 'DEV')
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -22,11 +22,12 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        with open(".secrets.json", "r") as f:
-            secrets = json.load(f)
-            for key, value in secrets.items():
-                os.environ[key] = value
-    except FileNotFoundError:
-        print("No .secrets.json found")
+    #try:
+    #    with open(".secrets.json", "r") as f:
+     #       secrets = json.load(f)
+    #        for key, value in secrets.items():
+     #           os.environ[key] = value
+    #except FileNotFoundError:
+    #    print("No .secrets.json found")
     main()
+#
