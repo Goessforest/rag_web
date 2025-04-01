@@ -33,44 +33,50 @@ class FileToMarkdown:
         Returns a tuple of the file content and the new name'''
         assert os.path.exists(path), "File does not exist"
         original_file_names = os.path.basename(path)
-        try:
-            # use llamaParse to parse the file in a high quality way
-            nest_asyncio.apply()
-            llama_parser =  LlamaParse(
-                api_key=os.environ.get('llama_cloud_api'),  # can also be set in your env as LLAMA_CLOUD_API_KEY
-                result_type="markdown",  # "markdown" and "text" are available
-                num_workers=4,  # if multiple files passed, split in `num_workers` API calls
-                verbose=True,
-                # language="en",  # Optionally you can define a language, default=en
-            )
-            pages = llama_parser.load_data(path)
-        except ValidationError as e:
-            # API KEY MISSING -> USE PUMMER INSTAED
-            logging.error(f"API KEY MISSING -> USE PUMMER INSTAED: {e}")
-            pages = [Document(text_resource=MediaResource(text="NO_CONTENT_HERE"))]
-        
-
-        # Flatten the pages and use plummer to extract text if parsing failed
-        file_content = ""
-        for index, page in enumerate(pages):
-            file_content += f"# Page {index} of File: %%FILE_NAME%%\n\n"
-
-            page_content = page.text_resource.text
-
-            # if parsing Failed with plummer
-            if page_content == "NO_CONTENT_HERE":
-                logging.warning(f"---------Plummer triggerd for page {index} of file {path}---------")
-                page_content = self._extractPdfPageWithPlummer(path, pageNumber=index)
+        if not path.endswith(".md"):
+            try:
+                # use llamaParse to parse the file in a high quality way
+                nest_asyncio.apply()
+                llama_parser =  LlamaParse(
+                    api_key=os.environ.get('llama_cloud_api'),  # can also be set in your env as LLAMA_CLOUD_API_KEY
+                    result_type="markdown",  # "markdown" and "text" are available
+                    num_workers=4,  # if multiple files passed, split in `num_workers` API calls
+                    verbose=True,
+                    # language="en",  # Optionally you can define a language, default=en
+                )
+                pages = llama_parser.load_data(path)
+            except ValidationError as e:
+                # API KEY MISSING -> USE PUMMER INSTAED
+                logging.error(f"API KEY MISSING -> USE PUMMER INSTAED: {e}")
+                pages = [Document(text_resource=MediaResource(text="NO_CONTENT_HERE"))]
             
-            file_content += page_content + "\n\n"
 
-        # get new name
-        new_name = self.get_file_name(file_content, original_file_names)
+            # Flatten the pages and use plummer to extract text if parsing failed
+            file_content = ""
+            for index, page in enumerate(pages):
+                file_content += f"# Page {index} of File: %%FILE_NAME%%\n\n"
 
-        # replace the placeholder with the new name
-        file_content = file_content.replace("%%FILE_NAME%%", new_name)
-        
-        return file_content, new_name
+                page_content = page.text_resource.text
+
+                # if parsing Failed with plummer
+                if page_content == "NO_CONTENT_HERE":
+                    logging.warning(f"---------Plummer triggerd for page {index} of file {path}---------")
+                    page_content = self._extractPdfPageWithPlummer(path, pageNumber=index)
+                
+                file_content += page_content + "\n\n"
+
+            # get new name
+            new_name = self.get_file_name(file_content, original_file_names)
+
+            # replace the placeholder with the new name
+            file_content = file_content.replace("%%FILE_NAME%%", new_name)
+            
+            return file_content, new_name
+        else:
+            with open(path, "r") as f:
+                file_content = f.read()
+            new_name = self.get_file_name(file_content, original_file_names)
+            return file_content, new_name
 
 
 
