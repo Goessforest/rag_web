@@ -70,9 +70,10 @@ class FileToMarkdown:
 
             # replace the placeholder with the new name
             file_content = file_content.replace("%%FILE_NAME%%", new_name)
-            
+            logging.info(f"PDF File name: {new_name}")
             return file_content, new_name
         else:
+            logging.warning(f"File is already a markdown file: {path}")
             with open(path, "r") as f:
                 file_content = f.read()
             new_name = self.get_file_name(file_content, original_file_names)
