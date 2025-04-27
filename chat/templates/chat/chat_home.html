@@ -1,66 +1,66 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Chat + PDF Upload</title>
     <style>
-        /* Basic styling for side-by-side layout */
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: sans-serif;
+            overflow: hidden; /* Prevent body scroll */
         }
+
         .wrapper {
             display: flex;
             height: 100vh;
+            overflow: hidden; /* Prevent wrapper scroll */
         }
+
         .sidebar {
+            display: flex;
+            flex-direction: column;
             width: 220px;
             background-color: #f0f0f0;
             border-right: 1px solid #ccc;
             padding: 10px;
             box-sizing: border-box;
+            overflow: hidden; /* Sidebar itself no scroll */
         }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto; /* Sidebar inner scroll */
+            margin-bottom: 10px;
+        }
+
         .chat-container {
             display: flex;
             flex-direction: column;
             flex: 1;
             background-color: #fff;
+            overflow: hidden; /* No double scroll */
         }
+
         .conversation {
             flex: 1;
-            overflow-y: auto;
+            overflow-y: auto; /* Conversation scrolls */
             padding: 10px;
         }
-        .message {
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 8px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        .user {
-            background-color: #d1e7dd;
-            margin-left: auto;
-        }
-        .sources {
-            background-color: #dfe5a2; /* Full yellowish background */
-            margin-right: auto;
-        }
-        .assistant {
-            background-color: #f8d7da;
-            margin-right: auto;
-        }
+
         .form-container {
             display: flex;
             padding: 10px;
             border-top: 1px solid #ccc;
+            background-color: white;
         }
+
         .form-container form {
             flex: 1;
             display: flex;
+            align-items: center;
         }
+
         .form-container input[type="text"] {
             flex: 1;
             padding: 10px;
@@ -68,6 +68,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
         .form-container input[type="submit"] {
             padding: 0 20px;
             background-color: #007bff;
@@ -76,7 +77,38 @@
             color: #fff;
             cursor: pointer;
         }
-        /* Notification bar styling */
+
+        .form-container input[type="number"] {
+            width: 50px;
+            margin-left: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        .message {
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user {
+            background-color: #d1e7dd;
+            margin-left: auto;
+        }
+
+        .assistant {
+            background-color: #f8d7da;
+            margin-right: auto;
+        }
+
+        .sources {
+            background-color: #dfe5a2;
+            margin-right: auto;
+        }
+
         .notification-container {
             position: fixed; 
             top: 0; 
@@ -84,10 +116,11 @@
             width: 100%;
             padding: 10px;
             text-align: center;
-            background-color: #28a745; /* or your preferred color */
+            background-color: #28a745;
             color: #fff;
             z-index: 9999;
         }
+
         .notification {
             display: inline-block;
             padding: 8px 15px;
@@ -114,58 +147,54 @@
     </script>
     {% endif %}
 
-    <!-- Only ONE .wrapper for our layout -->
     <div class="wrapper">
+
         <!-- SIDEBAR -->
         <div class="sidebar">
             <form method="POST">
                 {% csrf_token %}
-                <button type="submit" name="clear_chat" value="clear_chat" 
+                <button type="submit" name="clear_chat" value="clear_chat"
                         style="width: 100%; padding: 10px; background-color: #ff4d4d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">
                     Clear Chat
                 </button>
             </form>
 
-            <h2>Upload PDF</h2>
-            <form method="POST" enctype="multipart/form-data" id="pdfUploadForm">
-                {% csrf_token %}
-                <!-- 'multiple' allows user to select multiple files. -->
-                <input type="file" name="pdf_files" accept=".pdf,.md" multiple id="pdfInput" />
-            </form>
-            <script>
-                document.getElementById('pdfInput').addEventListener('change', function() {
-                    if (this.files.length > 0) {
-                        document.getElementById('pdfUploadForm').submit();
-                    }
-                });
-            </script>
+            <div class="sidebar-content">
+                <h2>Upload PDF</h2>
+                <form method="POST" enctype="multipart/form-data" id="pdfUploadForm">
+                    {% csrf_token %}
+                    <input type="file" name="pdf_files" accept=".pdf,.md" multiple id="pdfInput" />
+                </form>
+                <script>
+                    document.getElementById('pdfInput').addEventListener('change', function() {
+                        if (this.files.length > 0) {
+                            document.getElementById('pdfUploadForm').submit();
+                        }
+                    });
+                </script>
 
-            <h3>Available PDFs</h3>
-            <div>
-                {% for pdf in pdf_files %}
+                <h3>Available PDFs</h3>
                 <div>
-                    <!-- Button with conditional coloring -->
-                    <button
-                    style="background-color: {{ pdf.is_parsed|yesno:'#28a745,#dc3545' }}; 
-                           color: #fff; 
-                           border: none; 
-                           padding: 8px 15px; 
-                           margin: 5px 0; 
-                           border-radius: 4px; 
-                           cursor: pointer;"
-                    onclick="window.open('{{ MEDIA_URL }}pdfs/{{ pdf.name }}', '_blank');"
-
-                >
-                    {{ pdf.name }}
-                </button>
-                
+                    {% for pdf in pdf_files %}
+                    <div>
+                        <button
+                            style="background-color: {{ pdf.is_parsed|yesno:'#28a745,#dc3545' }};
+                                   color: #fff;
+                                   border: none;
+                                   padding: 8px 15px;
+                                   margin: 5px 0;
+                                   border-radius: 4px;
+                                   cursor: pointer;"
+                            onclick="window.open('{{ MEDIA_URL }}pdfs/{{ pdf.name }}', '_blank');">
+                            {{ pdf.name }}
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-                {% endfor %}
         </div>
 
-        </div>
-
-        <!-- MAIN CHAT AREA -->
+        <!-- CHAT AREA -->
         <div class="chat-container">
             <div class="conversation" id="conversation">
                 {% for msg in chat_messages %}
@@ -174,13 +203,10 @@
                                 {% elif msg.role == 'source' %}sources
                                 {% else %}assistant
                                 {% endif %}">
-                        
                         {% if msg.role == "assistant" %}
-                            <strong>Assistant:</strong> 
-                            {{ msg.content|safe }}
+                            <strong>Assistant:</strong> {{ msg.content|safe }}
                         {% elif msg.role == "source" %}
-                            <strong>Sources:</strong> 
-                            {{ msg.content|safe }}
+                            <strong>Sources:</strong> {{ msg.content|safe }}
                         {% else %}
                             <strong>You:</strong> {{ msg.content }}
                         {% endif %}
@@ -188,24 +214,22 @@
                 {% endfor %}
             </div>
 
-            <!-- CHAT INPUT FORM -->
             <div class="form-container">
                 <form method="POST">
                     {% csrf_token %}
                     <input type="text" name="user_input" placeholder="Type your message..." required />
                     <input type="submit" value="Send" />
-                    <!-- Numeric input field with default value 5 -->
                     <input 
                         type="number" 
                         name="similarity_top_k" 
                         value="{{ saved_int_count }}"
                         min="1" 
                         max="20"
-                        style="width: 30px; margin-right: 10px; margin-left: 10px;"
                     />
                 </form>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -217,5 +241,6 @@
             }
         }
     </script>
+
 </body>
 </html>

@@ -195,6 +195,10 @@ class Chat_home_model:
             
                 file_container = {"name": f, "is_parsed": bool(os.path.basename(f).strip(".pdf").lower() in md_files_list)}
                 pdf_files_list.append(file_container)
+            elif f.lower().endswith('.md'):
+
+                file_container = {"name": f, "is_parsed": bool(os.path.basename(f).strip(".md").lower() in md_files_list)}
+                pdf_files_list.append(file_container)
         logging.warning(f"PDF files: {pdf_files_list}")
         return pdf_files_list
 
