@@ -15,6 +15,7 @@ services:
 
     # Optional: define a custom name for the container
     container_name: my_django_db
+    restart: unless-stopped
 
   web:
     build: .
@@ -25,6 +26,7 @@ services:
     volumes:
       - .:/code
       - media:/code/media
+    restart: unless-stopped
     expose:
       - "8000"
     depends_on:
@@ -47,6 +49,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: my_django_nginx
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
