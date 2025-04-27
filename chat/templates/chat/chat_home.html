@@ -130,7 +130,7 @@
             <form method="POST" enctype="multipart/form-data" id="pdfUploadForm">
                 {% csrf_token %}
                 <!-- 'multiple' allows user to select multiple files. -->
-                <input type="file" name="pdf_files" accept=".pdf" multiple id="pdfInput" />
+                <input type="file" name="pdf_files" accept=".pdf,.md" multiple id="pdfInput" />
             </form>
             <script>
                 document.getElementById('pdfInput').addEventListener('change', function() {
